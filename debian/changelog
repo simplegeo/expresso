@@ -1,3 +1,12 @@
+nodejs-expresso (0.6.2-0sg3) UNRELEASED; urgency=low
+
+  [ Wade Simmons ]
+  * add debian/source/include-binaries
+
+  [ SimpleGeo Nerds ]
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Sun, 24 Oct 2010 23:25:06 +0000
+
 nodejs-expresso (0.6.2-0sg0) unstable; urgency=low
 
   * Debianized
