@@ -7,7 +7,7 @@ build-Depends: cdbs, debhelper (>= 7)
 Standards-Version: 3.9.1
 
 Package: nodejs-expresso
-Depends: nodejs (>= 0.2.3), nodejs-connect (>= 0.2.6), nodejs-jscoverage (>= 0.0.1), ${misc:Depends}
+Depends: nodejs (>= 0.2.3), nodejs-jscoverage (>= 0.0.1), ${misc:Depends}
 Architecture: all
 Description: node-expresso
  http://github.com/visionmedia/expresso
