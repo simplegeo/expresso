@@ -3,7 +3,8 @@
  * Module dependencies.
  */
 
-var http = require('http');
+var assert = require('assert')
+  , http = require('http');
 
 var server = http.createServer(function(req, res){
     if (req.method === 'GET') {
@@ -31,8 +32,21 @@ var server = http.createServer(function(req, res){
     }
 });
 
+var delayedServer = http.createServer(function(req, res){
+  res.writeHead(200);
+  res.end('it worked');
+});
+
+var oldListen = delayedServer.listen;
+delayedServer.listen = function(){
+  var args = arguments;
+  setTimeout(function(){
+    oldListen.apply(delayedServer, args);
+  }, 100);
+};
+
 module.exports = {
-    'test assert.response()': function(assert, beforeExit){
+    'test assert.response()': function(beforeExit){
         var called = 0;
 
         assert.response(server, {
@@ -45,7 +59,7 @@ module.exports = {
                 'Content-Type': 'application/json; charset=utf8'
             }
         });
-        
+
         assert.response(server, {
             url: '/foo',
             method: 'POST',
@@ -57,20 +71,39 @@ module.exports = {
             ++called;
             assert.ok(res);
         });
-        
+
         assert.response(server, {
             url: '/foo'
         }, function(res){
             ++called;
             assert.ok(res.body.indexOf('tj') >= 0, 'Test assert.response() callback');
         });
-        
+
         assert.response(server,
             { url: '/delay', timeout: 300 },
             { body: 'delayed' });
-        
+
         beforeExit(function(){
             assert.equal(2, called);
         });
+    },
+
+    'test assert.response() regexp': function(){
+      assert.response(server,
+        { url: '/foo', method: 'POST', data: 'foobar' },
+        { body: /^\/foo foo(bar)?/ });
+    },
+    
+    'test assert.response() regexp headers': function(){
+      assert.response(server,
+        { url: '/' },
+        { body: '{"name":"tj"}', headers: { 'Content-Type': /^application\/json/ } });
+    },
+
+    // [!] if this test doesn't pass, an uncaught ECONNREFUSED will display
+    'test assert.response() with deferred listen()': function(){
+      assert.response(delayedServer,
+        { url: '/' },
+        { body: 'it worked' });
     }
 };
