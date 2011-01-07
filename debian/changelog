@@ -1,3 +1,9 @@
+nodejs-expresso (0.7.2-0sg0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Wade Simmons <wade@simplegeo.com>  Fri, 07 Jan 2011 02:06:06 +0000
+
 nodejs-expresso (0.6.2-0sg11) UNRELEASED; urgency=low
 
   * UNRELEASED
