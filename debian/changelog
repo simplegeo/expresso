@@ -1,3 +1,33 @@
+nodejs-expresso (0.7.5-0sg0) unstable; urgency=low
+
+  * New upstream release
+
+ -- Wade Simmons <wade@simplegeo.com>  Wed, 06 Apr 2011 15:18:47 -0600
+
+nodejs-expresso (0.7.2-0sg16) UNRELEASED; urgency=low
+
+  * UNRELEASED
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Tue, 05 Apr 2011 22:53:08 +0000
+
+nodejs-expresso (0.7.2-0sg15) UNRELEASED; urgency=low
+
+  * UNRELEASED
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Thu, 17 Feb 2011 22:03:28 +0000
+
+nodejs-expresso (0.7.2-0sg13) UNRELEASED; urgency=low
+
+  * UNRELEASED
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Tue, 01 Feb 2011 01:56:18 +0000
+
+nodejs-expresso (0.7.2-0sg12) UNRELEASED; urgency=low
+
+  * UNRELEASED
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Fri, 07 Jan 2011 02:06:48 +0000
+
 nodejs-expresso (0.7.2-0sg0) unstable; urgency=low
 
   * New upstream release
