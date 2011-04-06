@@ -5,7 +5,7 @@
  * Copyright(c) TJ Holowaychuk <tj@vision-media.ca>
  * (MIT Licensed)
  */
- 
+
 /**
  * Module dependencies.
  */
@@ -20,10 +20,20 @@ var assert = require('assert'),
     defer;
 
 /**
+ * Setup the regex which is used to match test files.
+ * Adjust it to include coffeescript files if CS is available
+ */
+var file_matcher = /\.js$/;
+try { 
+  require('coffee-script'); 
+  file_matcher = /\.(js|coffee)$/;
+} catch (e) {}
+
+/**
  * Expresso version.
  */
 
-var version = '0.7.2';
+var version = '0.7.5';
 
 /**
  * Failure count.
@@ -41,13 +51,13 @@ var testcount = 0;
 /**
  * Whitelist of tests to run.
  */
- 
+
 var only = [];
 
 /**
  * Boring output.
  */
- 
+
 var boring = false;
 
 /**
@@ -188,7 +198,7 @@ while (args.length) {
             serial = true;
             break;
         default:
-            if (/\.js$/.test(arg)) {
+            if (file_matcher.test(arg)) {
                 files.push(arg);
             }
             break;
@@ -341,22 +351,23 @@ assert.length = function(val, n, msg) {
 assert.response = function(server, req, res, msg){
     // Check that the server is ready or defer
     if (!server.fd) {
-        if (!('__deferred' in server)) {
-            server.__deferred = [];
-        }
+        server.__deferred = server.__deferred || [];
         server.__deferred.push(arguments);
-        if (!server.__started) {
-            server.listen(server.__port = port++, '127.0.0.1', function(){
-                if (server.__deferred) {
-                    process.nextTick(function(){
-                        server.__deferred.forEach(function(args){
-                          assert.response.apply(assert, args);
-                        });
-                    });
-                }
-            });
-            server.__started = true;
-        }
+        server.listen(server.__port = port++, '127.0.0.1', function(){
+            server.__listening = true;
+            if (server.__deferred) {
+                server.__deferred.forEach(function(args){
+                    assert.response.apply(assert, args);
+                });
+                server.__deferred = null;
+            }
+        });
+        return;
+    }
+
+    // The socket was created but is not yet listening, so keep deferring
+    if (!server.__listening) {
+        server.__deferred.push(arguments);
         return;
     }
 
@@ -397,22 +408,28 @@ assert.response = function(server, req, res, msg){
 
         var request = client.request(method, req.url, req.headers);
 
+        var check = function() {
+            if (--server.__pending === 0) {
+                server.close();
+                server.__listening = false;
+            }
+        };
+
         // Timeout
         if (requestTimeout) {
             timer = setTimeout(function(){
-                --server.__pending || server.close();
+                check();
                 delete req.timeout;
                 assert.fail(msg + 'Request timed out after ' + requestTimeout + 'ms.');
             }, requestTimeout);
         }
 
         if (data) request.write(data);
-        request.addListener('response', function(response){
+        request.on('response', function(response){
             response.body = '';
             response.setEncoding('utf8');
-            response.addListener('data', function(chunk){ response.body += chunk; });
-            response.addListener('end', function(){
-                --server.__pending || server.close();
+            response.on('data', function(chunk){ response.body += chunk; });
+            response.on('end', function(){
                 if (timer) clearTimeout(timer);
 
                 // Assert response body
@@ -460,6 +477,7 @@ assert.response = function(server, req, res, msg){
 
                 // Callback
                 callback(response);
+                check();
             });
         });
         request.end();
@@ -533,10 +551,10 @@ function reportCoverage(cov) {
     sys.puts(lastSep);
     // Source
     for (var name in cov) {
-        if (name.match(/\.js$/)) {
+        if (name.match(file_matcher)) {
             var file = cov[name];
             if ((file.coverage < 100) || !quiet) {
-               print('\n   [bold]{' + name + '}:'); 
+               print('\n   [bold]{' + name + '}:');
                print(file.source);
                sys.print('\n');
             }
@@ -551,11 +569,11 @@ function reportCoverage(cov) {
  */
 
 function populateCoverage(cov) {
-    cov.LOC = 
+    cov.LOC =
     cov.SLOC =
     cov.totalFiles =
     cov.totalHits =
-    cov.totalMisses = 
+    cov.totalMisses =
     cov.coverage = 0;
     for (var name in cov) {
         var file = cov[name];
@@ -601,7 +619,7 @@ function coverage(data, val) {
     for (var i = 0, len = data.length; i < len; ++i) {
         if (data[i] !== undefined && data[i] == val) ++n;
     }
-    return n;  
+    return n;
 }
 
 /**
@@ -652,6 +670,7 @@ function run(files) {
  */
 
 function cursor(show) {
+    if (boring) return;    
     if (show) {
         sys.print('\x1b[?25h');
     } else {
@@ -685,10 +704,10 @@ function runFiles(files) {
  */
 
 function runFile(file, fn) {
-    if (file.match(/\.js$/)) {
+    if (file.match(file_matcher)) {
         var title = path.basename(file),
             file = path.join(cwd, file),
-            mod = require(file.replace(/\.js$/, ''));
+            mod = require(file.replace(file_matcher,''));
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
@@ -711,7 +730,7 @@ function runFile(file, fn) {
 function error(suite, test, err) {
     ++failures;
     var name = err.name,
-        stack = err.stack.replace(err.name, ''),
+        stack = err.stack ? err.stack.replace(err.name, '') : '',
         label = test === 'uncaught'
             ? test
             : suite + ' ' + test;
@@ -764,11 +783,11 @@ function runSuite(title, tests, fn) {
                                     clearTimeout(id);
                                     next();
                                 });
-                            } 
+                            }
                         });
                     } else {
                         test(function(fn){
-                            process.addListener('beforeExit', function(){
+                            process.on('beforeExit', function(){
                                 try {
                                     fn();
                                 } catch (err) {
@@ -789,7 +808,7 @@ function runSuite(title, tests, fn) {
 }
 
 /**
- * Report exceptions.
+* Report exceptions.
  */
 
 function report() {
@@ -825,14 +844,14 @@ function notify(msg) {
 
 // Report uncaught exceptions
 
-process.addListener('uncaughtException', function(err){
+process.on('uncaughtException', function(err){
     error('uncaught', 'uncaught', err);
 });
 
 // Show cursor
 
 ['INT', 'TERM', 'QUIT'].forEach(function(sig){
-    process.addListener('SIG' + sig, function(){
+    process.on('SIG' + sig, function(){
         cursor(true);
         process.exit(1);
     });

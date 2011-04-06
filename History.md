@@ -1,4 +1,19 @@
 
+0.7.5 / 2011-03-31 
+==================
+
+  * Fixed; removed some ansi-escape sequences in --boring mode [Norbert Schultz]
+
+0.7.4 / 2011-03-27 
+==================
+
+  * Added coffee-script support (wahoo...)
+
+0.7.3 / 2011-03-02 
+==================
+
+  * Fixed server listening check. Closes #62. [Andrew Stone]
+
 0.7.2 / 2010-12-29 
 ==================
 
