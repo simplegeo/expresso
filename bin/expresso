@@ -15,7 +15,6 @@ var assert = require('assert'),
     http = require('http'),
     path = require('path'),
     sys = require('sys'),
-    cwd = process.cwd(),
     fs = require('fs'),
     defer;
 
@@ -712,7 +711,6 @@ function runFiles(files) {
 function runFile(file, fn) {
     if (file.match(file_matcher)) {
         var title = path.basename(file),
-            file = path.join(cwd, file),
             mod = require(file.replace(file_matcher,''));
         (function check(){
            var len = Object.keys(mod).length;
