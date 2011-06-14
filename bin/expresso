@@ -711,9 +711,11 @@ function runFiles(files) {
 
 function runFile(file, fn) {
     if (file.match(file_matcher)) {
-        var title = path.basename(file),
-            file = path.join(cwd, file),
-            mod = require(file.replace(file_matcher,''));
+        var title = path.basename(file)
+        if (file[0] !== '/') {
+          file = path.join(cwd, file)
+        }
+        var mod = require(file.replace(file_matcher,''));
         (function check(){
            var len = Object.keys(mod).length;
            if (len) {
