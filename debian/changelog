@@ -1,3 +1,16 @@
+nodejs-expresso (0.7.7-0sg25) UNRELEASED; urgency=low
+
+  [ dsmith ]
+  * No longer use the cwd
+  * Revert "No longer use the cwd" This reverts commit
+    5ef4d71970bd2b080b3b868c4b0b427eaa9f7928.
+  * Only use the current working directory if an abosulte path is not
+    specified
+
+  [ SimpleGeo Nerds ]
+
+ -- SimpleGeo Nerds <nerds@simplegeo.com>  Tue, 14 Jun 2011 17:06:40 +0000
+
 nodejs-expresso (0.7.7-0sg24) UNRELEASED; urgency=low
 
   * UNRELEASED
